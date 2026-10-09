@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { Sidebar } from "@/components/Sidebar";
+import { TopBar } from "@/components/TopBar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -6,25 +10,20 @@ export const metadata: Metadata = {
   description: "O sistema premium para gestão de Dog Walkers e Pet Sitters.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="pt-BR">
       <body>
         <div className="app-layout">
-          <aside className="sidebar glass-panel">
-            <div className="brand">🐾 PetSitter Pro</div>
-            <nav className="nav-menu">
-              <a href="#" className="nav-item active">Dashboard</a>
-              <a href="#" className="nav-item">Agenda</a>
-              <a href="#" className="nav-item">Clientes & Pets</a>
-              <a href="#" className="nav-item">Faturamento</a>
-            </nav>
-          </aside>
+          {session?.user && <Sidebar />}
           <main className="main-content">
+            {session?.user && <TopBar user={session.user} />}
             {children}
           </main>
         </div>

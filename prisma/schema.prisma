@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  createdAt     DateTime       @default(now())
+  bookings      Booking[]
+  pets          Pet[]
+  notifications Notification[]
+}
+
+model Notification {
+  id     String  @id @default(cuid())
+  title  String
+  desc   String
+  unread Boolean @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Pet {
+  id          String  @id @default(cuid())
+  name        String
+  breed       String?
+  age         String?
+  allergies   String?
+  description String?
+  preferences String?
+
+  ownerId  String
+  owner    User      @relation(fields: [ownerId], references: [id])
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  name        String // Ex: "Passeio 30 min", "Hospedagem"
+  price       Float // Ex: 50.00
+  description String? // Opcional
+  bookings    Booking[]
+}
+
+model Booking {
+  id      String   @id @default(cuid())
+  date    DateTime // Data e hora marcada
+  petName String? // Nome do animal legado
+  petId   String? // Ligação com o animal cadastrado
+  pet     Pet?     @relation(fields: [petId], references: [id])
+  notes   String? // Observações do relatório
+
+  // Ligação com o Serviço escolhido
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  // Ligação com o Dono (Usuário)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
